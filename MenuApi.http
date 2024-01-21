@@ -1,0 +1,24 @@
+﻿@MenuApi_HostAddress = http://localhost:5092
+
+GET {{MenuApi_HostAddress}}/api/categories
+
+###
+
+GET {{MenuApi_HostAddress}}/api/products
+
+###
+
+GET {{MenuApi_HostAddress}}/api/supplies
+
+###
+
+PUT {{MenuApi_HostAddress}}/api/supplies/1
+Content-Type: application/json
+
+{
+  "id":1,
+  "name":"Leche",
+  "products":[1]
+}
+
+###
