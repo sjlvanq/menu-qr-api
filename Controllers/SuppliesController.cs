@@ -45,15 +45,32 @@ namespace MenuApi.Controllers
         // PUT: api/Supplies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSupply(int id, Supply supply)
+        public async Task<IActionResult> PutSupply(int id, SupplyDTO supply)
         {
-            if (id != supply.Id)
+            var targetSupply = _context.Supplies.Include(s => s.Products)
+                .Where(s=>s.Id==id).First();
+
+            //var targetSupply = await _context.Supplies.FindAsync(id);
+            if (targetSupply == null) { return NotFound(); }
+            
+            if (supply.Name != null)
             {
-                return BadRequest();
+                targetSupply.Name = supply.Name;
             }
-
-            _context.Entry(supply).State = EntityState.Modified;
-
+            if (supply.ProductIds != null)
+            {
+                var products = await _context.Products
+                .Where(p => supply.ProductIds.Contains(p.Id))
+                .ToListAsync();
+                if(targetSupply.Products != null)
+                { 
+                    targetSupply.Products.Clear();
+                }
+                targetSupply.Products = products;
+            }
+            
+            _context.Entry(targetSupply).State = EntityState.Modified;
+            
             try
             {
                 await _context.SaveChangesAsync();
@@ -76,12 +93,21 @@ namespace MenuApi.Controllers
         // POST: api/Supplies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Supply>> PostSupply(Supply supply)
+        public async Task<ActionResult<Supply>> PostSupply(SupplyDTO supply)
         {
-            _context.Supplies.Add(supply);
+            var newSupply = new Supply();
+            newSupply.Name = supply.Name;
+            if (supply.ProductIds != null) { 
+                var products = await _context.Products
+                    .Where(p => supply.ProductIds.Contains(p.Id))
+                    .ToListAsync();
+                newSupply.Products = products;
+            }
+
+            _context.Supplies.Add(newSupply);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSupply", new { id = supply.Id }, supply);
+            return CreatedAtAction("GetSupply", new { id = newSupply.Id }, newSupply);
         }
 
         // DELETE: api/Supplies/5

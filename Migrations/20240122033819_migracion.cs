@@ -5,18 +5,23 @@
 namespace MenuApi.Migrations
 {
     /// <inheritdoc />
-    public partial class migracion_insumos : Migration
+    public partial class migracion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "Name",
-                table: "Products",
-                type: "TEXT",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Supplies",
@@ -29,6 +34,27 @@ namespace MenuApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Supplies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    IsCombo = table.Column<bool>(type: "INTEGER", nullable: true),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -56,6 +82,11 @@ namespace MenuApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryId",
+                table: "Products",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductSupply_SuppliesId",
                 table: "ProductSupply",
                 column: "SuppliesId");
@@ -68,17 +99,13 @@ namespace MenuApi.Migrations
                 name: "ProductSupply");
 
             migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
                 name: "Supplies");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "Name",
-                table: "Products",
-                type: "TEXT",
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "TEXT",
-                oldNullable: true);
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

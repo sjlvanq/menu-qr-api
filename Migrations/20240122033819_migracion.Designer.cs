@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MenuApi.Migrations
 {
     [DbContext(typeof(MenuDb))]
-    [Migration("20240121091350_migracion_productosycategorias")]
-    partial class migracion_productosycategorias
+    [Migration("20240122033819_migracion")]
+    partial class migracion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,7 +48,6 @@ namespace MenuApi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -56,6 +55,35 @@ namespace MenuApi.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("MenuApi.Models.Supply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Supplies");
+                });
+
+            modelBuilder.Entity("ProductSupply", b =>
+                {
+                    b.Property<int>("ProductsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SuppliesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProductsId", "SuppliesId");
+
+                    b.HasIndex("SuppliesId");
+
+                    b.ToTable("ProductSupply");
                 });
 
             modelBuilder.Entity("MenuApi.Models.Product", b =>
@@ -67,6 +95,21 @@ namespace MenuApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("ProductSupply", b =>
+                {
+                    b.HasOne("MenuApi.Models.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MenuApi.Models.Supply", null)
+                        .WithMany()
+                        .HasForeignKey("SuppliesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MenuApi.Models.Category", b =>
